@@ -11,8 +11,10 @@ void DrawingLocatorByKeyDesc::outlineSchemesAndTables(Mat& img) {
 
 	Mat descriptors;
 	f2d->compute(img, keypoints, descriptors);
+	cout << "Descriptors computed" << endl;
 
 	Mat testData(descriptors.rows, 6 + descriptors.cols, CV_32FC1);
+	cout << "Test data initialized" << endl;
 
 	int i = 0;
 	for (auto & keyPoint : keypoints) {
@@ -31,9 +33,14 @@ void DrawingLocatorByKeyDesc::outlineSchemesAndTables(Mat& img) {
 		i++;
 	}
 
+	cout << "testData rows: " << testData.rows << endl;
+	cout << "testData cols: " << testData.cols << endl;
+
 	Mat testResults;
 
 	svm->predict(testData, testResults);
+
+	cout << "SVM prediction done" << endl;
 
 	string siftCsvs = "C:/Users/Micha³/Desktop/Systemy Wizyjne/Dane/DoKlas/CSV/SIFT/";
 
@@ -41,11 +48,15 @@ void DrawingLocatorByKeyDesc::outlineSchemesAndTables(Mat& img) {
 	myfile.open(siftCsvs + "predicted.csv");
 	myfile << cv::format(testResults, cv::Formatter::FMT_CSV) << std::endl;
 	myfile.close();
-
 }
 
 DrawingLocatorByKeyDesc::DrawingLocatorByKeyDesc() {
 	svm = ml::SVM::create();
+
+	svm->setType(ml::SVM::C_SVC);
+	svm->setKernel(ml::SVM::RBF);
+	svm->setC(12.5);
+	svm->setGamma(0.50625);
 }
 
 void DrawingLocatorByKeyDesc::saveKeyDescsToCsv(const string& imgsPath, const string& keysCsvPath, const char& classId) {
@@ -108,9 +119,16 @@ void DrawingLocatorByKeyDesc::train(const string& keysCsvPath, const string& cla
 	Mat trainLabels = data->getTrainResponses();
 	trainLabels.convertTo(trainLabels, CV_32S); // needed for SVM
 
-	svm->trainAuto(trainData, ml::ROW_SAMPLE, trainLabels);
+	cout << "trainData rows: " << trainData.rows << endl;
+	cout << "trainData cols: " << trainData.cols << endl;
+
+	svm->train(trainData, ml::ROW_SAMPLE, trainLabels);
+
+	cout << "SVM trained" << endl;
 
 	svm->save(classifierSavePath + "model.yml");
+
+	cout << "Model saved" << endl;
 }
 
 void DrawingLocatorByKeyDesc::loadPretrainedModel(const string& classifierLoadPath) {

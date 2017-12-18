@@ -1,8 +1,8 @@
 #include "ConnectedComponent.h"
 
 
-ConnectedComponent::ConnectedComponent(Point l, Point r, Point u, Point d, int blacks, double diag) :
-		left(l), right(r), up(u), down(d), blackPixels(blacks), diagonal(diag) {}
+ConnectedComponent::ConnectedComponent(Point l, Point r, Point u, Point d, int blacks) :
+		left(l), right(r), up(u), down(d), blackPixels(blacks){}
 
 ConnectedComponent::ConnectedComponent(list<Point> neighbours, const Mat& I) {
 		blackPixels = neighbours.size();
@@ -20,17 +20,19 @@ ConnectedComponent::ConnectedComponent(list<Point> neighbours, const Mat& I) {
 				down = Point(iter->x, iter->y);
 		}
 
-		diagonal = longestDiagonal(list<Point>() = { down, left, right, up });
+		area = (down.y - up.y) * (right.x - left.x);
 
-		Mat compRect(I, Rect(Point(left.x, down.y), Point(right.x, up.y)));
-		vector<Vec2f> lines;
-		HoughLines(compRect, lines, 1, CV_PI / 180, 180, 0, 0);
-		lineQnt = lines.size();
-		//TODO isTable should depend on line rotation
-		if (lineQnt > 0)
-			isTable = false;
-		else
-			isTable = true;
+		centroid = Point(0, 0);
+
+		//Mat compRect(I, Rect(Point(left.x, down.y), Point(right.x, up.y)));
+		//vector<Vec2f> lines;
+		//HoughLines(compRect, lines, 1, CV_PI / 180, 180, 0, 0);
+		//lineQnt = lines.size();
+		////TODO isTable should depend on line rotation
+		//if (lineQnt > 0)
+		//	isTable = false;
+		//else
+		//	isTable = true;
 	}
 
 
@@ -38,27 +40,34 @@ ConnectedComponent::ConnectedComponent(list<Point> neighbours, const Mat& I) {
 		return sqrt(pow(a.y - b.y, 2) + pow(a.x - b.x, 2));
 	}
 
-	double ConnectedComponent::longestDiagonal(const list<Point>& points) {
+	//double ConnectedComponent::longestDiagonal(const list<Point>& points) {
 
-		double diag = 0;
+	//	double diag = 0;
 
-		Point mainPoint = points.front();
+	//	Point mainPoint = points.front();
 
-		list<Point>::const_iterator iter = points.begin();
-		iter++;
-		for (; iter != points.end(); iter++) {
-			double tempDiag = euclideanDistance(mainPoint, *iter);
-			if (tempDiag > diag)
-				diag = tempDiag;
-		}
+	//	list<Point>::const_iterator iter = points.begin();
+	//	iter++;
+	//	for (; iter != points.end(); iter++) {
+	//		double tempDiag = euclideanDistance(mainPoint, *iter);
+	//		if (tempDiag > diag)
+	//			diag = tempDiag;
+	//	}
 
-		if ((int)points.size() > 2) {
-			list<Point> ps;
-			ps.insert(ps.end(), ++points.begin(), points.end());
-			double tempDiag = longestDiagonal(ps);
-			if (tempDiag > diag)
-				diag = tempDiag;
-		}
+	//	if ((int)points.size() > 2) {
+	//		list<Point> ps;
+	//		ps.insert(ps.end(), ++points.begin(), points.end());
+	//		double tempDiag = longestDiagonal(ps);
+	//		if (tempDiag > diag)
+	//			diag = tempDiag;
+	//	}
 
-		return diag;
+	//	return diag;
+	//}
+
+	bool ConnectedComponent::compare(const ConnectedComponent& connComp) {
+
+		return left == connComp.left && right == connComp.right && up == connComp.up && down == connComp.down
+			&& blackPixels == connComp.blackPixels && isTable == connComp.isTable
+			&& area == connComp.area && centroid == connComp.centroid;
 	}

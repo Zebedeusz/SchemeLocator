@@ -15,14 +15,17 @@ class DrawingLocatorByConnComps
 private:
 	list<ConnectedComponent> connectedComponents;
 	Mat I;
+	vector<Vec2f> lines;
 
 	void getNeighbouringPixels(const Point& point, Mat& img, list<Point>& neighbours);
-	list<ConnectedComponent> getConnectedComponents();
-	void filterLargerComponents(const list<ConnectedComponent>& comps);
+	void findConnectedComponents();
+	void filterLargerComponents();
+	void filterNotCollinearComponents();
+	bool isPointOnLine(const Point& linePointA, const Point& linePointB, const Point& point);
 
 public:
 	DrawingLocatorByConnComps(const Mat& img);
-	void findConnectedComponents();
+	void findSchemesAndTables();
 
 	void outlineSchemes(Mat& img);
 	void outlineTables(Mat& img);

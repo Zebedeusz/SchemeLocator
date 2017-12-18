@@ -12,18 +12,18 @@ using namespace std;
 class ConnectedComponent {
 
 private:
-	double longestDiagonal(const list<Point>& points);
 	double euclideanDistance(const Point& a, const Point& b);
 
 public:
 	Point left, right, up, down;
 	int blackPixels;
-	double diagonal;
 	bool isTable;
-	int lineQnt;
+	int area;
+	Point centroid;
 
-	ConnectedComponent(Point l, Point r, Point u, Point d, int blacks, double diag);
+	ConnectedComponent(Point l, Point r, Point u, Point d, int blacks);
 	ConnectedComponent(list<Point> neighbours, const Mat& I);
+	bool compare(const ConnectedComponent& connComp);
 };
 
 #endif 
