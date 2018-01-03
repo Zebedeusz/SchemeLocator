@@ -1,8 +1,14 @@
 #include "ConnectedComponent.h"
 
 
-ConnectedComponent::ConnectedComponent(Point l, Point r, Point u, Point d, int blacks) :
-		left(l), right(r), up(u), down(d), blackPixels(blacks){}
+ConnectedComponent::ConnectedComponent(const Point& l, const Point& r, const Point& u, const Point& d, const bool& table) {
+
+	left = l; right = r; up = u; down = d;
+	blackPixels = -1;
+	isTable = table;
+	area = (down.y - up.y) * (right.x - left.x);
+	centroid = Point(0, 0);
+}
 
 ConnectedComponent::ConnectedComponent(list<Point> neighbours, const Mat& I) {
 		blackPixels = neighbours.size();
@@ -24,15 +30,7 @@ ConnectedComponent::ConnectedComponent(list<Point> neighbours, const Mat& I) {
 
 		centroid = Point(0, 0);
 
-		//Mat compRect(I, Rect(Point(left.x, down.y), Point(right.x, up.y)));
-		//vector<Vec2f> lines;
-		//HoughLines(compRect, lines, 1, CV_PI / 180, 180, 0, 0);
-		//lineQnt = lines.size();
-		////TODO isTable should depend on line rotation
-		//if (lineQnt > 0)
-		//	isTable = false;
-		//else
-		//	isTable = true;
+		isTable = false;
 	}
 
 
@@ -70,4 +68,34 @@ ConnectedComponent::ConnectedComponent(list<Point> neighbours, const Mat& I) {
 		return left == connComp.left && right == connComp.right && up == connComp.up && down == connComp.down
 			&& blackPixels == connComp.blackPixels && isTable == connComp.isTable
 			&& area == connComp.area && centroid == connComp.centroid;
+	}
+
+	bool ConnectedComponent::operator==(const ConnectedComponent& connComp) const {
+
+		return left.x == connComp.left.x && 
+			right.x == connComp.right.x &&
+			up.y == connComp.up.y && 
+			down.y == connComp.down.y
+			&& blackPixels == connComp.blackPixels && isTable == connComp.isTable
+			&& area == connComp.area && centroid == connComp.centroid;
+	}
+
+	bool ConnectedComponent::compareComponents(const ConnectedComponent& connComp1, const ConnectedComponent& connComp2) {
+
+		return connComp1.area > connComp2.area;
+	}
+
+	const Point& ConnectedComponent::calculateCentroid(const Mat& I) {
+
+		Mat compRect(I, Rect(Point(left.x, down.y), Point(right.x, up.y)));
+		Mat subMat = Mat::ones(compRect.size(), compRect.type()) * 255;
+		subtract(subMat, compRect, compRect);
+
+		Moments mms = moments(compRect, true);
+
+		subtract(subMat, compRect, compRect);
+
+		centroid = Point(left.x + cvRound(mms.m10 / mms.m00), up.y + cvRound(mms.m01 / mms.m00));
+
+		return centroid;
 	}

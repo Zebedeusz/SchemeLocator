@@ -2,7 +2,9 @@
 
 
 int main() {
-	string imgPathTable = "C:/Users/Micha³/Desktop/Systemy Wizyjne/Dane/TreningoweObrazy/2011_MusicEmotionClassification_Thesis_047.png";
+	string imgPathTable = "C:/Users/Micha³/Desktop/Systemy Wizyjne/Dane/PoKonwersji/2002 Music Simi_2.jpg";
+	string imgPathDividedTable = "C:/Users/Micha³/Desktop/Systemy Wizyjne/Dane/PoKonwersji/2010_ISMIR_MUSIC_EMOTION RECOGNITION.jpg";
+
 	string imgPathDrawing = "C:/Users/Micha³/Desktop/Systemy Wizyjne/Dane/TreningoweObrazy/2011_MusicEmotionClassification_Thesis_021.png";
 	string imgPathDrawing2 = "C:/Users/Micha³/Desktop/Systemy Wizyjne/Dane/TreningoweObrazy/Learning Music Emotion Primitives via Supervised_3.png";
 	string imgPathDoc = "C:/Users/Micha³/Desktop/Systemy Wizyjne/Dane/Testowe/2010 LEARNING FEATURES FROM MUSIC AUDIO WITH DEEP BELIEF_4.png";
@@ -29,11 +31,11 @@ int main() {
 	//namedWindow("image", WINDOW_AUTOSIZE);
 	//resizeWindow("image", 800, 600);
 
-	for (auto & p : experimental::filesystem::directory_iterator(imagesPath)) {
+	//for (auto & p : experimental::filesystem::directory_iterator(imagesPath)) {
 
-		Mat img = imread(p.path().generic_string(), IMREAD_COLOR);
+		//Mat img = imread(p.path().generic_string(), IMREAD_COLOR);
 
-	//Mat img = imread(imghq, IMREAD_COLOR);
+		Mat img = imread(imgPathTable, IMREAD_COLOR);
 
 		Mat imgGrey;
 		cvtColor(img, imgGrey, COLOR_BGR2GRAY);
@@ -54,20 +56,20 @@ int main() {
 		Mat outlinedSchemes;
 		loc.outlineSchemesAndTables(outlinedSchemes);
 
-		imwrite(
-			imgSavePath + p.path().generic_string().replace(0, p.path().generic_string().rfind("/"), ""),
-			outlinedSchemes);
-
 		//imwrite(
-		//	imgSavePath + imghq.replace(0, imghq.rfind("/"), ""),
+		//	imgSavePath + p.path().generic_string().replace(0, p.path().generic_string().rfind("/"), ""),
 		//	outlinedSchemes);
+
+		imwrite(
+			imgSavePath + imgPathTable.replace(0, imghq.rfind("/"), ""),
+			outlinedSchemes);
 
 		//namedWindow("image", WINDOW_AUTOSIZE);
 		////resizeWindow("image", 800, 600);
 		//imshow("image", outlinedSchemes);
 		////resizeWindow("image", 800, 600);
 		//waitKey();
-	}
+	//}
 
 	//DrawingLocatorByKeyDesc dr;
 	////dr.saveKeyDescsToCsv(imgsText, allSiftCsvs, '0');

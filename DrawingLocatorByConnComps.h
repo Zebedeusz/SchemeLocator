@@ -15,13 +15,20 @@ class DrawingLocatorByConnComps
 private:
 	list<ConnectedComponent> connectedComponents;
 	Mat I;
-	vector<Vec2f> lines;
 
 	void getNeighbouringPixels(const Point& point, Mat& img, list<Point>& neighbours);
 	void findConnectedComponents();
 	void filterLargerComponents();
 	void filterNotCollinearComponents();
 	bool isPointOnLine(const Point& linePointA, const Point& linePointB, const Point& point);
+	void filterUniqueTables();
+	void distinctSchemesFromTables();
+	bool isLineNotOblique(const double& theta);
+	int countVerticalLines(const vector<Vec2f>& lines);
+	int countHorizontalLines(const vector<Vec2f>& lines);
+	bool isGrid(const Mat& I);
+	bool hasRectangularContour(const Mat& I);
+	int countCorners(const Mat& I);
 
 public:
 	DrawingLocatorByConnComps(const Mat& img);

@@ -21,9 +21,12 @@ public:
 	int area;
 	Point centroid;
 
-	ConnectedComponent(Point l, Point r, Point u, Point d, int blacks);
+	ConnectedComponent(const Point& l, const Point& r, const Point& u, const Point& d, const bool& table);
 	ConnectedComponent(list<Point> neighbours, const Mat& I);
 	bool compare(const ConnectedComponent& connComp);
+	bool operator==(const ConnectedComponent& connComp) const;
+	static bool compareComponents(const ConnectedComponent& connComp1, const ConnectedComponent& connComp2);
+	const Point& calculateCentroid(const Mat& I);
 };
 
 #endif 
