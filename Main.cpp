@@ -5,40 +5,46 @@ int main() {
 	string imgPathTable = "C:/Users/Micha³/Desktop/Systemy Wizyjne/Dane/PoKonwersji/2002 Music Simi_2.jpg";
 	string imgPathDividedTable = "C:/Users/Micha³/Desktop/Systemy Wizyjne/Dane/PoKonwersji/2010_ISMIR_MUSIC_EMOTION RECOGNITION.jpg";
 
-	string imgPathDrawing = "C:/Users/Micha³/Desktop/Systemy Wizyjne/Dane/TreningoweObrazy/2011_MusicEmotionClassification_Thesis_021.png";
-	string imgPathDrawing2 = "C:/Users/Micha³/Desktop/Systemy Wizyjne/Dane/TreningoweObrazy/Learning Music Emotion Primitives via Supervised_3.png";
-	string imgPathDoc = "C:/Users/Micha³/Desktop/Systemy Wizyjne/Dane/Testowe/2010 LEARNING FEATURES FROM MUSIC AUDIO WITH DEEP BELIEF_4.png";
-	string imgSimplePath = "C:/Users/Micha³/Desktop/Systemy Wizyjne/Dane/TreningoweObrazy/1.png";
-
 	string imagesPath = "C:/Users/Micha³/Desktop/Systemy Wizyjne/Dane/PoKonwersji/";
 	string imgSavePath = "C:/Users/Micha³/Desktop/Systemy Wizyjne/Dane/obramowane/";
 
 	string imghq = "C:/Users/Micha³/Desktop/Systemy Wizyjne/Dane/DoKlas/Reszta/2010 Architecture for Automated Tagging and Clustering of Song Files2010 Architecture for Automated Tagging and Clustering of Song Files-5.jpg";
 
-	string imgsText = "C:/Users/Micha³/Desktop/Systemy Wizyjne/Dane/DoKlas/Teksty/";
-	string csvTextDescs = "C:/Users/Micha³/Desktop/Systemy Wizyjne/Dane/DoKlas/textDescs.csv";
-	string imgsScheme = "C:/Users/Micha³/Desktop/Systemy Wizyjne/Dane/DoKlas/Schematy/";
-	string csvSchemeDescs = "C:/Users/Micha³/Desktop/Systemy Wizyjne/Dane/DoKlas/schemeDescs.csv";
-	string imgsTable = "C:/Users/Micha³/Desktop/Systemy Wizyjne/Dane/DoKlas/Tabele/";
-	string csvTableDescs = "C:/Users/Micha³/Desktop/Systemy Wizyjne/Dane/DoKlas/tableDescs.csv";
-
-	string siftCsvs = "C:/Users/Micha³/Desktop/Systemy Wizyjne/Dane/DoKlas/CSV/SIFT/";
-	string allSiftCsvs = "C:/Users/Micha³/Desktop/Systemy Wizyjne/Dane/DoKlas/CSV/SIFT/allDescs.csv";
-
-	string modelPath = "C:/Users/Micha³/Desktop/Systemy Wizyjne/Dane/DoKlas/CSV/SIFT/model.yml";
 
 
 	//namedWindow("image", WINDOW_AUTOSIZE);
 	//resizeWindow("image", 800, 600);
 
+	string imgsForTest[] = {
+		//"C:/Users/Micha³/Desktop/Systemy Wizyjne/Dane/PoKonwersji/2002 Content-ba_5.jpg",
+		//wywala siê podczas szukania komp
+		//"C:/Users/Micha³/Desktop/Systemy Wizyjne/Dane/PoKonwersji/2003 Algorithmi_5.jpg",
+		//mo¿e nieadekwatny
+		//"C:/Users/Micha³/Desktop/Systemy Wizyjne/Dane/PoKonwersji/2009 Music Clus_6.jpg",
+		//error z at
+		//"C:/Users/Micha³/Desktop/Systemy Wizyjne/Dane/PoKonwersji/2003 Algorithmi_3.jpg",
+		//"C:/Users/Micha³/Desktop/Systemy Wizyjne/Dane/PoKonwersji/2002 Content-ba.jpg",
+		//"C:/Users/Micha³/Desktop/Systemy Wizyjne/Dane/PoKonwersji/2002 Content-ba_1.jpg",
+		//"C:/Users/Micha³/Desktop/Systemy Wizyjne/Dane/PoKonwersji/2002 Content-ba_2.jpg",
+		//"C:/Users/Micha³/Desktop/Systemy Wizyjne/Dane/PoKonwersji/2002 Content-ba_3.jpg",
+		"C:/Users/Micha³/Desktop/Systemy Wizyjne/Dane/PoKonwersji/2002 Music Simi_2.jpg",
+		"C:/Users/Micha³/Desktop/Systemy Wizyjne/Dane/PoKonwersji/2002 Self-Organ.jpg",
+		"C:/Users/Micha³/Desktop/Systemy Wizyjne/Dane/PoKonwersji/2002 Self-Organ_2.jpg",
+		"C:/Users/Micha³/Desktop/Systemy Wizyjne/Dane/PoKonwersji/2006 Blind Clus_1.jpg",
+		"C:/Users/Micha³/Desktop/Systemy Wizyjne/Dane/PoKonwersji/2010_ISMIR_MUSI_6.jpg",
+	};
+
 	//for (auto & p : experimental::filesystem::directory_iterator(imagesPath)) {
+	for (string & s : imgsForTest) {
 
-		//Mat img = imread(p.path().generic_string(), IMREAD_COLOR);
+		cout << "Loaded image located at: " << endl << s << endl;
 
-		Mat img = imread(imgPathTable, IMREAD_COLOR);
+		Mat imgGrey = imread(s, IMREAD_GRAYSCALE);
 
-		Mat imgGrey;
-		cvtColor(img, imgGrey, COLOR_BGR2GRAY);
+		//Mat img = imread(imgPathTable, IMREAD_COLOR);
+
+		//Mat imgGrey;
+		//cvtColor(img, imgGrey, COLOR_BGR2GRAY);
 
 		Mat binarized;
 		threshold(imgGrey, binarized, 0, 255, THRESH_OTSU);
@@ -47,7 +53,7 @@ int main() {
 		//correctSkew(binarized, binarizedCOrrectedSkew);
 
 		//imwrite(
-		//	imgSavePath + "rotated.jpg", 
+		//	imgSavePath + "binarized.jpg",
 		//	binarized);
 
 		DrawingLocatorByConnComps loc(binarized);
@@ -56,45 +62,24 @@ int main() {
 		Mat outlinedSchemes;
 		loc.outlineSchemesAndTables(outlinedSchemes);
 
-		//imwrite(
-		//	imgSavePath + p.path().generic_string().replace(0, p.path().generic_string().rfind("/"), ""),
-		//	outlinedSchemes);
-
 		imwrite(
-			imgSavePath + imgPathTable.replace(0, imghq.rfind("/"), ""),
+			imgSavePath + s.replace(0, s.rfind("/"), ""),
 			outlinedSchemes);
 
-		//namedWindow("image", WINDOW_AUTOSIZE);
-		////resizeWindow("image", 800, 600);
-		//imshow("image", outlinedSchemes);
-		////resizeWindow("image", 800, 600);
-		//waitKey();
-	//}
+		cout << "Image with outlined schemes and tables saved as: " << endl 
+			<< imgSavePath + s.replace(0, s.rfind("/"), "") << endl << endl;
 
-	//DrawingLocatorByKeyDesc dr;
-	////dr.saveKeyDescsToCsv(imgsText, allSiftCsvs, '0');
-	////dr.saveKeyDescsToCsv(imgsScheme, allSiftCsvs, '1');
-	////dr.saveKeyDescsToCsv(imgsTable, siftCsvs + "allDescs.csv", '2');
-	//dr.train(allSiftCsvs, siftCsvs);
-	////dr.loadPretrainedModel(modelPath);
-
-	//Mat img = imread(imghq, IMREAD_COLOR);
-	//cout << "Loaded img" << endl;
-
-	//Mat imgGrey;
-	//cvtColor(img, imgGrey, COLOR_BGR2GRAY);
-	//cout << "Loaded img grey" << endl;
-
-	//dr.outlineSchemesAndTables(imgGrey);
-
-	//Mat img = imread(imghq, IMREAD_COLOR);
-
-	//dr.outlineSchemesAndTables(img);
+		//imwrite(
+		//	imgSavePath + imgPathTable.replace(0, imghq.rfind("/"), ""),
+		//	outlinedSchemes);
+	}
 
 	return 0;
 }
 
 void correctSkew(const Mat& img, Mat& imgRotated) {
+
+	cout << "Skew correction in progress" << endl;
 
 	vector<double> variances;
 
@@ -147,6 +132,8 @@ void correctSkew(const Mat& img, Mat& imgRotated) {
 
 	int angle = minIndex - 40;
 	rotateImg(img, imgRotated, angle);
+
+	cout << "Image rotated by " << angle << " degress" << endl;
 }
 
 double variance(const vector<int>& vec) {

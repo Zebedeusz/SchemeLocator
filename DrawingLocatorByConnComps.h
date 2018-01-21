@@ -29,13 +29,17 @@ private:
 	bool isGrid(const Mat& I);
 	bool hasRectangularContour(const Mat& I);
 	int countCorners(const Mat& I);
+	void findImageBoundaries(Mat& Img, Point& min, Point& max);
+	void reduceJointsToPoints(Mat& joints);
+	Point findHighestPoint(const list<Point>& points);
+	void finalChecks();
+	int medianAreaOfComponents();
+	double meanAreaOfComponents();
+
 
 public:
 	DrawingLocatorByConnComps(const Mat& img);
 	void findSchemesAndTables();
-
-	void outlineSchemes(Mat& img);
-	void outlineTables(Mat& img);
 	void outlineSchemesAndTables(Mat& img);
 };
 
