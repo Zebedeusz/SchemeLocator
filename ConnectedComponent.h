@@ -16,7 +16,6 @@ private:
 
 public:
 	Point left, right, up, down;
-	int blackPixels;
 	bool isTable;
 	int area;
 	Point centroid;

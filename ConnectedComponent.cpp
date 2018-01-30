@@ -4,14 +4,12 @@
 ConnectedComponent::ConnectedComponent(const Point& l, const Point& r, const Point& u, const Point& d, const bool& table) {
 
 	left = l; right = r; up = u; down = d;
-	blackPixels = -1;
 	isTable = table;
 	area = (down.y - up.y) * (right.x - left.x);
 	centroid = Point(0, 0);
 }
 
 ConnectedComponent::ConnectedComponent(list<Point> neighbours, const Mat& I) {
-		blackPixels = neighbours.size();
 
 		left = Point(I.cols - 1, 0); right = Point(0, 0); up = Point(0, I.rows - 1); down = Point(0, 0);
 
@@ -38,35 +36,10 @@ ConnectedComponent::ConnectedComponent(list<Point> neighbours, const Mat& I) {
 		return sqrt(pow(a.y - b.y, 2) + pow(a.x - b.x, 2));
 	}
 
-	//double ConnectedComponent::longestDiagonal(const list<Point>& points) {
-
-	//	double diag = 0;
-
-	//	Point mainPoint = points.front();
-
-	//	list<Point>::const_iterator iter = points.begin();
-	//	iter++;
-	//	for (; iter != points.end(); iter++) {
-	//		double tempDiag = euclideanDistance(mainPoint, *iter);
-	//		if (tempDiag > diag)
-	//			diag = tempDiag;
-	//	}
-
-	//	if ((int)points.size() > 2) {
-	//		list<Point> ps;
-	//		ps.insert(ps.end(), ++points.begin(), points.end());
-	//		double tempDiag = longestDiagonal(ps);
-	//		if (tempDiag > diag)
-	//			diag = tempDiag;
-	//	}
-
-	//	return diag;
-	//}
-
 	bool ConnectedComponent::compare(const ConnectedComponent& connComp) {
 
 		return left == connComp.left && right == connComp.right && up == connComp.up && down == connComp.down
-			&& blackPixels == connComp.blackPixels && isTable == connComp.isTable
+			&& isTable == connComp.isTable
 			&& area == connComp.area && centroid == connComp.centroid;
 	}
 
@@ -76,7 +49,7 @@ ConnectedComponent::ConnectedComponent(list<Point> neighbours, const Mat& I) {
 			right.x == connComp.right.x &&
 			up.y == connComp.up.y && 
 			down.y == connComp.down.y
-			&& blackPixels == connComp.blackPixels && isTable == connComp.isTable
+			&& isTable == connComp.isTable
 			&& area == connComp.area && centroid == connComp.centroid;
 	}
 

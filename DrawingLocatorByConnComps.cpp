@@ -37,14 +37,12 @@ void DrawingLocatorByConnComps::filterLargerComponents() {
 		cout << "Large components filtering in progress" << endl;
 
 		//double threshold = 6 * meanAreaOfComponents();
-		double threshold = 12 * medianAreaOfComponents();
+		double threshold = 13 * medianAreaOfComponents();
 
 		list<ConnectedComponent> tempConnComps;
 		for (list<ConnectedComponent>::const_iterator iter = connectedComponents.begin();
 			iter != connectedComponents.end(); iter++) {
-			//if (iter->diagonal >= threshold)
 			if (iter->area >= threshold)
-				//connectedComponents.push_back(*iter);
 				tempConnComps.push_back(*iter);
 		}
 
@@ -148,9 +146,6 @@ void DrawingLocatorByConnComps::filterNotCollinearComponents() {
 			sumWidths += iter->right.x - iter->left.x;
 		}
 
-		double avgHeight = sumHeights / (double)connectedComponents.size();
-		const double DISTANCE_RESOUTION = 0.2 * avgHeight;
-
 		double avgWidth = sumWidths / (double)connectedComponents.size();
 		const int WIDTH_THRESHOLD = avgWidth / 3;
 
@@ -168,10 +163,10 @@ void DrawingLocatorByConnComps::filterNotCollinearComponents() {
 		vector<Vec2f> lines;
 		vector<Vec2f> tempLines;
 
-		HoughLines(centroids, lines, DISTANCE_RESOUTION, CV_PI / 180, 4, 0, 0, 0, 2 * (CV_PI / 180));
-		HoughLines(centroids, tempLines, DISTANCE_RESOUTION, CV_PI / 180, 4, 0, 0, 88 * (CV_PI / 180), 92 * (CV_PI / 180));
+		HoughLines(centroids, lines, 1, CV_PI / 180, 3, 0, 0, 0, 2 * (CV_PI / 180));
+		HoughLines(centroids, tempLines, 1, CV_PI / 180, 3, 0, 0, 88 * (CV_PI / 180), 92 * (CV_PI / 180));
 		lines.insert(lines.end(), tempLines.begin(), tempLines.end());
-		HoughLines(centroids, tempLines, DISTANCE_RESOUTION, CV_PI / 180, 4, 0, 0, 178 * (CV_PI / 180), 180 * (CV_PI / 180));
+		HoughLines(centroids, tempLines, 1, CV_PI / 180, 3, 0, 0, 178 * (CV_PI / 180), 180 * (CV_PI / 180));
 		lines.insert(lines.end(), tempLines.begin(), tempLines.end());
 
 		//iterate over all components
@@ -195,22 +190,6 @@ void DrawingLocatorByConnComps::filterNotCollinearComponents() {
 					pt1.y = cvRound(y0 + 1000 * (a0));
 					pt2.x = cvRound(x0 - 1000 * (-b0));
 					pt2.y = cvRound(y0 - 1000 * (a0));
-
-					//double a = tan((CV_PI / 2) + theta);
-					//double b = rho / sin(theta);
-
-					//int cenX = iter->centroid.x, cenY = iter->centroid.y;
-					//int lineX0 = cvRound(x0 + (iter->centroid.y)*(-b0));
-					//int lineY0 = cvRound(y0 + (iter->centroid.x)*(a0));
-					//double lineX = (((double)iter->centroid.y - b) / a);
-					//double lineY = (a*(double)iter->centroid.x + b);
-
-					//if (iter->centroid.x == cvRound(x0 + (iter->centroid.y)*(-b)) &&
-					//	iter->centroid.y == cvRound(y0 + (iter->centroid.x)*(a)))
-					//	tempConnComps.push_back(*iter);
-
-					//if (iter->centroid.x == lineX && iter->centroid.y == lineY)
-					//	tempConnComps.push_back(*iter);
 
 					if (isPointOnLine(pt1, pt2, iter->centroid)) {
 						isOnAnyLine = true;
@@ -352,6 +331,9 @@ void DrawingLocatorByConnComps::distinctSchemesFromTables() {
 		for (list<ConnectedComponent>::iterator iter = connectedComponents.begin();
 			iter != connectedComponents.end(); iter++) {
 
+			if (iter->isTable)
+				continue;
+
 			Mat compRect(tempI, Rect(Point(iter->left.x, iter->down.y), Point(iter->right.x, iter->up.y)));
 
 			//convert to white on black image
@@ -373,29 +355,56 @@ void DrawingLocatorByConnComps::distinctSchemesFromTables() {
 			//combining vertical and horizontal lines
 			vertAndHorz = vertical + horizontal;
 
-			Mat joints;
-			bitwise_and(horizontal, vertical, joints);
-
 			//imwrite(
 			//	"C:/Users/Micha³/Desktop/Systemy Wizyjne/Dane/obramowane/vertAndHorz.jpg",
 			//	vertAndHorz);
+
+			int blackPixelsInVertndHorz = countNonZero(vertAndHorz);
+
+			Mat structVertHorz = getStructuringElement(MORPH_RECT, Size(6, 6));
+			dilate(vertAndHorz, vertAndHorz, structVertHorz, Point(-1, -1));
+
+			//imwrite(
+			//	"C:/Users/Micha³/Desktop/Systemy Wizyjne/Dane/obramowane/vertAndHorz_dil.jpg",
+			//	vertAndHorz);
+
+			//erode(vertAndHorz, vertAndHorz, structVertHorz, Point(-1, -1));
+
+			//imwrite(
+			//	"C:/Users/Micha³/Desktop/Systemy Wizyjne/Dane/obramowane/vertAndHorz_er.jpg",
+			//	vertAndHorz);
+
+			//finding vertical lines
+			//dilate(vertical, vertical, structVertical, Point(-1, -1)) : 
+			erode(vertAndHorz, vertical, structVertical, Point(-1, -1));
+
+			//finding horizontal lines
+			//dilate(horizontal, horizontal, structHorizontal, Point(-1, -1)) :
+			erode(vertAndHorz, horizontal, structHorizontal, Point(-1, -1));
+
+			Mat joints;
+			bitwise_and(horizontal, vertical, joints);
 
 			//imwrite(
 			//	"C:/Users/Micha³/Desktop/Systemy Wizyjne/Dane/obramowane/joints1.jpg",
 			//	joints);
 
-			//if component has no joints - meaning cannot be a table
+			//if component has no joints - it cannot be a table
 			if (countNonZero(joints) == 0)
-				break;
+				continue;
 
 			reduceJointsToPoints(joints);
-			Point min, max;
 
+			//imwrite(
+			//	"C:/Users/Micha³/Desktop/Systemy Wizyjne/Dane/obramowane/joints2.jpg",
+			//	joints);
+
+			Point min, max;
 			findImageBoundaries(joints, min, max);
 			joints = Mat(joints, Rect(min, max));
 
 			//imwrite(
-			//	"C:/Users/Micha³/Desktop/Systemy Wizyjne/Dane/obramowane/joints2.jpg",
+			//	"C:/Users/Micha³/Desktop/Systemy Wizyjne/Dane/obramowane/joints3.jpg",
 			//	joints);
 
 			//method change
@@ -435,6 +444,7 @@ void DrawingLocatorByConnComps::distinctSchemesFromTables() {
 			//change of method
 			//for (int i = 0; i < lines.size(); ++i) {
 
+			//METHOD CHANGE
 			//	double rho = lines[i][0], theta = lines[i][1];
 			//	Point pt1, pt2;
 			//	double a = cos(theta), b = sin(theta);
@@ -457,7 +467,7 @@ void DrawingLocatorByConnComps::distinctSchemesFromTables() {
 			if (hasRectangularContour(joints) && countCorners(joints) > 4 && isGrid(joints)) {
 				iter->isTable = true;
 
-				//removing signs outside of the image
+				//removing signs outside of the table
 				int tempLeftX = iter->left.x;
 				int tempUpY = iter->up.y;
 				iter->left = Point(tempLeftX + min.x, tempUpY + min.y);
@@ -467,6 +477,7 @@ void DrawingLocatorByConnComps::distinctSchemesFromTables() {
 				//method change
 				//const double THRESHOLD = 0.02;
 
+				//CHANGE OF CONCEPTION
 				//double rho = lines[0][0], theta = lines[0][1];
 				//double a = cos(theta), b = sin(theta);
 				//double x0 = a*rho, y0 = b*rho;
@@ -739,7 +750,7 @@ void DrawingLocatorByConnComps::findImageBoundaries(Mat& Img, Point& min, Point&
 	}
 
 	min = Point(minX, minY);
-	max = Point(maxX, maxY);
+	max = Point(maxX == 0 ? 0 : maxX + 1, maxY == 0 ? 0 : maxY + 1);
 }
 
 void DrawingLocatorByConnComps::reduceJointsToPoints(Mat& joints) {
@@ -784,6 +795,8 @@ void DrawingLocatorByConnComps::finalChecks() {
 
 	if (connectedComponents.size() > 0) {
 
+		//list<ConnectedComponent> compsFinalList;
+
 		//check if any component does not lie inside another one
 		for (list<ConnectedComponent>::iterator iter = connectedComponents.begin();
 			iter != connectedComponents.end(); iter++) {
@@ -794,13 +807,44 @@ void DrawingLocatorByConnComps::finalChecks() {
 				if (iterIn->compare(*iter))
 					continue;
 
-				if (iter->left.x > iterIn->left.x &&
-					iter->right.x < iterIn->right.x &&
-					iter->up.y > iterIn->up.y &&
-					iter->down.y < iterIn->down.y)
+				//if left up corner is in another component
+				if (((iterIn->left.x >= iter->left.x &&
+					iterIn->left.x <= iter->right.x &&
+					iterIn->up.y >= iter->up.y &&
+					iterIn->up.y <= iter->down.y)
+					||
+					//if right up corner is in another component
+					(iterIn->right.x >= iter->left.x &&
+						iterIn->right.x <= iter->right.x &&
+						iterIn->up.y >= iter->up.y &&
+						iterIn->up.y <= iter->down.y)
+					||
+					//if left down corner is in another component
+					(iterIn->left.x >= iter->left.x &&
+						iterIn->left.x <= iter->right.x &&
+						iterIn->down.y >= iter->up.y &&
+						iterIn->down.y <= iter->down.y)
+					||
+					//if right down corner is in another component
+					(iterIn->right.x >= iter->left.x &&
+						iterIn->right.x <= iter->right.x &&
+						iterIn->down.y >= iter->up.y &&
+						iterIn->down.y <= iter->down.y)
+					))
 				{
-					iter = connectedComponents.erase(iter);
-					break;
+					//change dimensions of larger component if necessary
+					if (iterIn->right.x > iter->right.x)
+						iter->right.x = iterIn->right.x;
+					if (iterIn->down.y > iter->down.y)
+						iter->down.y = iterIn->down.y;
+					if (iterIn->left.x < iter->left.x)
+						iter->left.x = iterIn->left.x;
+					if (iterIn->up.y < iter->up.y)
+						iter->up.y = iterIn->up.y;
+
+					//remove smaller component
+					connectedComponents.erase(iterIn);
+					iterIn = connectedComponents.begin();
 				}
 			}
 		}
